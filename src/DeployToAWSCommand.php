@@ -104,8 +104,8 @@ class DeployToAWSCommand extends Command {
     $output->writeln("IP: " . $ip);
     $output->writeln("AvailabilityZone: " . $instance['Placement']['AvailabilityZone']);
     $delay = 60;
-    $output->writeln("<greenblink>Waiting $delay seconds for the server to get ready.</greenblink>");
-    // TODO:
+    $output->writeln("<fg=green>Waiting $delay seconds for the server to get ready.</fg=green>");
+    // TODO poll for ssh-connectivity instead.
     sleep($delay);
 
     $ssh_username = $config['ssh_username'];
