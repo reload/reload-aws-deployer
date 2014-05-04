@@ -114,6 +114,7 @@ class DeployToAWSCommand extends Command {
     $ssh_command = "ssh -q -t -o StrictHostKeyChecking=no -i $keypair_path $ssh_username@$hostname";
 
     // Clone the site.
+    $output->writeln("<fg=green>Cloning $repo and checking out $revision</fg=green>");
     $vhost_dir = "/vagrant_sites/$hostname";
     $this->exec($output, "$ssh_command git clone $repo $vhost_dir");
     $this->exec($output, "$ssh_command git --git-dir=$vhost_dir/.git checkout $revision");
@@ -129,8 +130,10 @@ class DeployToAWSCommand extends Command {
     $baseline_site_path = $config['baseline_site_name'] . '/sites/default';
     $baseline_site_destination_path = $vhost_dir . '/sites/default';
 
+    $output->writeln("<fg=green>Downloading baseline</fg=green>");
     // Unpack the baseline.
     $this->exec($output, "$ssh_command wget " . $config['baseline_url'] . " -O /mnt/baseline/baseline.tar.gz");
+    $output->writeln("<fg=green>Unpacking baseline</fg=green>");
     $this->exec($output, "$ssh_command tar -zxf /mnt/baseline/baseline.tar.gz -C /mnt/baseline");
 
     // Get the database in place.
@@ -142,21 +145,26 @@ class DeployToAWSCommand extends Command {
     // Put prepared settings.php in place.
     $this->exec($output, "$ssh_command cp /vagrant/reload/settings.php $baseline_site_destination_path/");
 
+    $output->writeln("<fg=green>Provisioning (importing database and setting up site)</fg=green>");
     // Provision (this will create the vhost and restart apache).
     $this->exec($output, "$ssh_command 'sudo bash -c \"cd /vagrant && FACTER_vagrant_guest_ip=127.0.0.1 FACTER_parrot_php_version=5.3 puppet apply --modulepath=/vagrant/modules -v manifests/parrot.pp\"'");
 
+    $output->writeln("<fg=green>Waking up Drupal.</fg=green>");
     // Final drupal setup stuff.
+    $this->exec($output, "$ssh_command sudo chown -R www-data $baseline_site_destination_path/files");
+    $this->exec($output, "$ssh_command sudo chown -R www-data $baseline_site_destination_path/private");
     $this->exec($output, "$ssh_command sudo chmod -R 777 $baseline_site_destination_path/files");
+    $this->exec($output, "$ssh_command sudo chmod -R 777 $baseline_site_destination_path/private");
     $this->exec($output, "$ssh_command drush -r $baseline_site_destination_path cc all");
 
     $output->writeln('----------');
 
     $elapsed = time() - $startup_time;
-    $output->writeln("<greenblink>Done in $elapsed seconds: http://$hostname</greenblink>");
+    $output->writeln("<fg=green>Done in $elapsed seconds: http://$hostname</fg=green>");
   }
 
   function exec($output, $stuff) {
-    $output->writeln('<fg=green>Doing</fg=green> <fg=cyan>' . $stuff . '</fg=cyan>');
+    $output->writeln('<fg=cyan>' . $stuff . '</fg=cyan>');
     `$stuff`;
   }
 }
