@@ -12,6 +12,8 @@ ami_id: ami-658e4812
 # EC2 Security-group to use (if any).
 security_groups:
   - hackathon_sg_eu
+ec2_instance_type: m1.small
+
 
 # Authentication to use
 keypair_name: mads-key-pair-eu

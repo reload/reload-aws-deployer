@@ -60,7 +60,7 @@ class DeployToAWSCommand extends Command {
       'MaxCount'         => 1,
       'KeyName'          => $config['keypair_name'],
       'SecurityGroups'   => $config['security_groups'],
-      'InstanceType'     => 'm1.small',
+      'InstanceType'     => $config['ec2_instance_type'],
     ));
 
     $instance_ids = array();
