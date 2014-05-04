@@ -3,6 +3,8 @@ reload-aws-deployer
 
 Tool for deploying sites via Amazon Web Services (very much work in progress)
 
+Website: http://reload.github.io/reload-aws-deployer/
+
 *Prerequisites*
  * Credentials has been setup in ~/.aws/credentials
  * The user executing the deployment-script must have ssh-keys setup to grant
