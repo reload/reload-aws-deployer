@@ -1,0 +1,19 @@
+# URL where the baseline (drush arb backup) can be found
+baseline_url: http://172.31.40.140/spejderdk-baseline-20140504.tar.gz
+
+# Name artifacts inside the baseline - at some point this could be read from
+# the manifest.
+baseline_site_name: spejderdk
+baseline_site_path: spejderdk/sites/default
+baseline_database_path: spejderdk.sql
+
+# Amazon Machine Image to boot
+ami_id: ami-658e4812
+# EC2 Security-group to use (if any).
+security_groups:
+  - hackathon_sg_eu
+
+# Authentication to use
+keypair_name: mads-key-pair-eu
+ssh_username: ubuntu
+keypair_path: /Users/mads/Downloads/junk/mads-key-pair-eu.pem

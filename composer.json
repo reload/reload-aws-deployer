@@ -1,0 +1,16 @@
+{
+  "require": {
+      "aws/aws-sdk-php": "2.*",
+      "symfony/console": "2.5.*@dev",
+      "symfony/yaml": "2.4.4"
+
+  },
+  "autoload": {
+    "psr-4": {
+      "Reload\\Aws\\": "src/"
+    }
+  }
+}
+
+
+
