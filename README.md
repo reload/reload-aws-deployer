@@ -11,6 +11,7 @@ Website: http://reload.github.io/reload-aws-deployer/
    access to github.
 
 *Setup*
+ * composer install
  * copy default.config.yml to config.yml and edit it
 
 Sample command:
