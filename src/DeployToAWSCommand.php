@@ -39,6 +39,8 @@ class DeployToAWSCommand extends Command {
    * @return int|null|void
    */
   protected function execute(InputInterface $input, OutputInterface $output) {
+    // TODO: Move all the business logic into a more general DeployToAWS class
+    // and leave the DeployToAWSCommand to just doing the CLI integration.
     $style = new OutputFormatterStyle('green', 'black', array('bold', 'blink'));
     $output->getFormatter()->setStyle('greenblink', $style);
 
@@ -113,12 +115,13 @@ class DeployToAWSCommand extends Command {
     // SSH to the box and start provisioning.
     $ssh_command = "ssh -q -t -o StrictHostKeyChecking=no -i $keypair_path $ssh_username@$hostname";
 
+    // TODO: Most of the stuff below is better done via a puppet provisioning.
+    // That way we have a setup that could also be Vagrantified.
     // Clone the site.
     $output->writeln("<fg=green>Cloning $repo and checking out $revision</fg=green>");
     $vhost_dir = "/vagrant_sites/$hostname";
     $this->exec($output, "$ssh_command git clone $repo $vhost_dir");
     $this->exec($output, "$ssh_command git --git-dir=$vhost_dir/.git checkout $revision");
-
 
     // Create the destination-directory for the baseline.
     $this->exec($output, "$ssh_command sudo mkdir /mnt/baseline");
@@ -132,11 +135,18 @@ class DeployToAWSCommand extends Command {
 
     $output->writeln("<fg=green>Downloading baseline</fg=green>");
     // Unpack the baseline.
+    // TODO: It should be possible to stream the tarball directly through tar
+    // without having to first write it to disk and then unpack it.
     $this->exec($output, "$ssh_command wget " . $config['baseline_url'] . " -O /mnt/baseline/baseline.tar.gz");
     $output->writeln("<fg=green>Unpacking baseline</fg=green>");
     $this->exec($output, "$ssh_command tar -zxf /mnt/baseline/baseline.tar.gz -C /mnt/baseline");
 
     // Get the database in place.
+    // TODO: the baseline contains a MANIFEST.ini that gives us the name of the
+    // database and the path to the site inside the package (I think). We should
+    // just use that to get a hold of the stuff inside the package.
+    // It would be simpler from a script running directly on the box during
+    // provisioning though.
     $this->exec($output, "$ssh_command mv /mnt/baseline/" . $baseline_database_file . " /vagrant_databases/drupal.sql");
 
     // Get the site in place.
@@ -145,6 +155,9 @@ class DeployToAWSCommand extends Command {
     // Put prepared settings.php in place.
     $this->exec($output, "$ssh_command cp /vagrant/reload/settings.php $baseline_site_destination_path/");
 
+    // TODO: as mentioned above, we should just do almost everything of the
+    // stuff above in the provisioning. Fork the parrot repo, and maybe
+    // contribute some stuff back that makes it gennerally AWS compatible.
     $output->writeln("<fg=green>Provisioning (importing database and setting up site)</fg=green>");
     // Provision (this will create the vhost and restart apache).
     $this->exec($output, "$ssh_command 'sudo bash -c \"cd /vagrant && FACTER_vagrant_guest_ip=127.0.0.1 FACTER_parrot_php_version=5.3 puppet apply --modulepath=/vagrant/modules -v manifests/parrot.pp\"'");
